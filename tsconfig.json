@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+      "target": "es5",
+      "lib": ["ESNext"],
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "removeComments": true,
+      "declaration": true,
+      "outDir": "lib",
+      "strict": true,
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true
+    },
+    "scripts": {
+        "test": "jest",
+    },
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules", 
+      "**/__tests__/*"
+    ]
+  }
