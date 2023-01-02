@@ -53,7 +53,7 @@ export class DynamoDBSemaphoreService implements ISemaphoreService {
     const cmd = new UpdateItemCommand({
       TableName: this.tableName,
       Key: {
-        PK: { S: this.keyName },
+        id: { S: this.keyName },
       },
       UpdateExpression: 'SET LockValue = :NewValue',
       ConditionExpression: 'LockValue = :OldValue',

@@ -8,7 +8,7 @@ export interface DatabaseAdapter {
    * @param item item to be added
    * @returns true if the item didn't exist in the repository earlier
    */
-  create(data: Record<string, string>): Promise<boolean>;
+  create(data: Record<string, any>): Promise<boolean>;
 
   /**
    *
@@ -16,7 +16,7 @@ export interface DatabaseAdapter {
    * @param item item to be updated
    * @returns true if item was successfully updated
    */
-  update(id: string, data: Record<string, string>): Promise<boolean>;
+  update(id: string, data: Record<string, any>): Promise<boolean>;
 
   /**
    *
@@ -30,12 +30,12 @@ export interface DatabaseAdapter {
    * @param id item id to be found in repository
    * @returns item
    */
-  findOne(id: string): Promise<Record<string, string>>;
+  findOne(id: string): Promise<Record<string, any>>;
 
   /**
    *
    * @param item data to search item from repository
    * @returns item
    */
-  find(data: Record<string, string>): Promise<Record<string, string>>;
+  find(data: Record<string, any>): Promise<Record<string, any>>;
 }

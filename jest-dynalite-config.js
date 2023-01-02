@@ -4,13 +4,13 @@ module.exports = {
         TableName: "table",
         KeySchema: [
           { 
-              AttributeName: "PK", 
+              AttributeName: "id", 
               KeyType: "HASH" 
           }
         ],
         AttributeDefinitions: [
           {
-              AttributeName: "PK", 
+              AttributeName: "id", 
               AttributeType: "S" 
           },
         ],
@@ -20,7 +20,7 @@ module.exports = {
         },
         data: [
           {
-            PK: "lock-test",
+            id: "lock-test",
             LockValue: 0,
           },
         ],

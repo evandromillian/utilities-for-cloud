@@ -1,1 +1,1 @@
-export { DatabaseAdapter, RedisAdapter } from './database';
+export { DatabaseAdapter, RedisAdapter, DynamoDBAdapter } from './database';
