@@ -1,7 +1,7 @@
 {
   "name": "millian-utilities-for-cloud",
-  "version": "1.0.2",
-  "description": "",
+  "version": "1.0.3",
+  "description": "UFC - Utilities for Cloud projects",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
