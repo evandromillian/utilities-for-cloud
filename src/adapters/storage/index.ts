@@ -1,1 +1,2 @@
-export { S3Adapter } from './s3.adapter';
+export { IStorageAdapter } from './storage.adapter';
+export { S3Adapter } from './impl/s3.adapter';

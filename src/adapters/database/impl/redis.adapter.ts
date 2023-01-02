@@ -1,4 +1,4 @@
-import { DatabaseAdapter } from './database.adapter';
+import { DatabaseAdapter } from '../database.adapter';
 
 import Redis from 'ioredis';
 
