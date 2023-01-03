@@ -1,13 +1,18 @@
 import { DatabaseAdapter } from "../database.adapter";
+import { DatabaseAtomicAdapter } from "../database_atomic.adapter";
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient,
          PutCommand,
          UpdateCommand,
          DeleteCommand,
-         GetCommand } from "@aws-sdk/lib-dynamodb";
+         GetCommand, 
+         TransactWriteCommand} from "@aws-sdk/lib-dynamodb";
 
-export class DynamoDBAdapter implements DatabaseAdapter {
+export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
+
+    private static readonly COUNTER_VALUE = 'CounterValue';
+
     docClient: DynamoDBDocumentClient;
 
     constructor(private tableName: string, client?: DynamoDBClient) {
@@ -27,7 +32,7 @@ export class DynamoDBAdapter implements DatabaseAdapter {
 
         this.docClient = DynamoDBDocumentClient.from(client, { marshallOptions, unmarshallOptions });
     }
-
+    
     async create(data: Record<string, any>): Promise<boolean> {
         
         const cmd = new PutCommand({
@@ -73,5 +78,85 @@ export class DynamoDBAdapter implements DatabaseAdapter {
 
     async find(_data: Record<string, any>): Promise<Record<string, any>> {
         throw new Error("Method not implemented.");
+    }
+
+    /**
+     * Implements DatabaseAtomicAdapter::checkCounter using some predefinitions:
+     * - counter variable column: CounterValue
+     * 
+     */
+    async checkCounter(id: string): Promise<number> {
+        const it = await this.findOne(id);
+        return it.CounterValue;
+    }
+
+    /**
+     * Implements DatabaseAtomicAdapter::incrementCounter using some predefinitions:
+     * - counter variable column: CounterValue
+     * 
+     */
+    async incrementCounter(id: string, maxValue: number): Promise<boolean> {
+        const cmd = new TransactWriteCommand({
+            TransactItems: [
+                {
+                    Put: {
+                        TableName: this.tableName,
+                        Item: {
+                            id: id,
+                            CounterValue: 0
+                        },
+                        ConditionExpression: 'attribute_not_exists(id)'
+                    }
+                },
+                {
+                    Update: {
+                        TableName: this.tableName,
+                        Key: {
+                            id: id,
+                        },
+                        UpdateExpression: 'SET #counter = if_not_exists(#counter, :init) + :one',
+                        ConditionExpression: '#counter <= :maxvalue',
+                        ExpressionAttributeNames: {
+                          '#counter': DynamoDBAdapter.COUNTER_VALUE
+                        },
+                        ExpressionAttributeValues: {
+                          ':init': 0,
+                          ':one': 1,
+                          ':maxvalue': maxValue,
+                        }
+                    }
+                }
+            ]
+        })
+        
+        return await this.docClient.send(cmd)
+                                   .then(_ => true);
+    }
+
+    /**
+     * Implements DatabaseAtomicAdapter::decrementCounter using some predefinitions:
+     * - counter variable column: CounterValue
+     * 
+     */
+    async decrementCounter(id: string): Promise<boolean> {
+        const cmd = new UpdateCommand({
+            TableName: this.tableName,
+            Key: {
+              id: id,
+            },
+            UpdateExpression: 'SET #counter = if_not_exists(#counter, :init) - :one',
+            ConditionExpression: '#counter > :zero',
+            ExpressionAttributeNames: {
+                '#counter': DynamoDBAdapter.COUNTER_VALUE
+            },
+            ExpressionAttributeValues: {
+              ':init': 0,
+              ':one': 1,
+              ':zero': 0,
+            }
+        });
+        
+        return await this.docClient.send(cmd)
+                                   .then(_ => true);
     }
 }
