@@ -8,3 +8,4 @@ For the test configuration I used the following tutorials:
 
 * [Mocking AWS with Jest](https://dev.to/elthrasher/mocking-aws-with-jest-and-typescript-199i)
 * [Import ioredis-mock correctly in jest](https://9to5tutorial.com/typescript-import-ioredis-mock-correctly-in-jest)
+* [How to skip tests](https://codewithhugo.com/run-skip-single-jest-test/)
