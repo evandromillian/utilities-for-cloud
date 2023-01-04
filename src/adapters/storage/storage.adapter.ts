@@ -3,7 +3,7 @@
  * Adapter interface for store and fetch files from storage APIs
  * 
  */
-export interface IStorageAdapter {
+export interface StorageAdapter {
 
     /**
      * 
