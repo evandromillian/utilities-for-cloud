@@ -102,7 +102,7 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
                     Put: {
                         TableName: this.tableName,
                         Item: {
-                            id: id,
+                            id,
                             CounterValue: 0
                         },
                         ConditionExpression: 'attribute_not_exists(id)'
@@ -112,7 +112,7 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
                     Update: {
                         TableName: this.tableName,
                         Key: {
-                            id: id,
+                            id,
                         },
                         UpdateExpression: 'SET #counter = if_not_exists(#counter, :init) + :one',
                         ConditionExpression: '#counter <= :maxvalue',
@@ -142,7 +142,7 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
         const cmd = new UpdateCommand({
             TableName: this.tableName,
             Key: {
-              id: id,
+              id,
             },
             UpdateExpression: 'SET #counter = if_not_exists(#counter, :init) - :one',
             ConditionExpression: '#counter > :zero',

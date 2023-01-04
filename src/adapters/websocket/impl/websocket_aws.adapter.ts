@@ -22,16 +22,16 @@ export class AWSWebsocketAdapter implements WebSocketAdapter {
         this._setupClient(connId);
 
         let connectionId = connId;
-        if (typeof connectionId === 'object') {
+        if (typeof connId === 'object') {
             // Extract connection id from API Gateway event
-            connId = connectionId.requestContext.connectionId;
+            connectionId = connectionId.requestContext.connectionId;
         }
 
         // Convert to binary buffer to send payload
         // Always send string, it's easy to integration with any platform
         const payloadArray = new Uint8Array(Buffer.from(JSON.stringify(payload)));
         const cmd = new PostToConnectionCommand({
-                            ConnectionId: connId,
+                            ConnectionId: connectionId,
                             Data: payloadArray
                         });
 
