@@ -1,6 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBAdapter } from "../../src/adapters";
-
 import { SemaphoreService } from '../../src/services';
 
 var semaphore: SemaphoreService;
