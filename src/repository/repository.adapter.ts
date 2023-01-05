@@ -92,7 +92,7 @@ export abstract class BaseRepository<T> {
      */
     static defaultKeyStrategy(): KeyStrategy {
         return {
-            parseKey: (id: string): Record<string, string> => { return { id: id }; },
+            parseKey: (id: string): Record<string, string> => { return { id }; },
             joinKey: (item: Record<string, string>) => { return item.id; },
         };
     }
