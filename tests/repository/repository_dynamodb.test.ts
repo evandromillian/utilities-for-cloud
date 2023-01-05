@@ -21,7 +21,7 @@ class UserRepository extends BaseRepository<User> {
 
 var repository: UserRepository;
 
-describe('Repository with Redis tests', () => {
+describe('Repository with DynamoDB tests', () => {
 
     beforeAll(async () => {
         const client = new DynamoDBClient({
@@ -31,36 +31,41 @@ describe('Repository with Redis tests', () => {
               region: "local",
             }),
         });
+        const adapter = new DynamoDBAdapter('table_sk', client);
 
-
-        const adapter = new DynamoDBAdapter('table', client);
-        repository = new UserRepository(adapter);
+        const keyStrategy = {
+            parseKey: (id: string): Record<string, any> => {
+                return { pk: 'user', sk: id }; 
+            },
+            joinKey: (item: Record<string, any>) => { return item.sk; },
+        };        
+        repository = new UserRepository(adapter, keyStrategy);
     });
 
-    it('Test create entity with DynamoDB', async () => {
-        const user = { id: 'user:1', username: 'superman', email: 'test@test.com' };
+    it('Test create entity', async () => {
+        const user = { id: '1', username: 'superman', email: 'test@test.com' };
         const ret = await repository.create(user);
 
         expect(ret).toBe(true);
     });
 
-    it('Test update entity with DynamoDB', async () => {
-        const user = { id: 'user:3', username: 'wonder-woman', email: 'diana.prince@olympus.com' };
+    it('Test update entity', async () => {
+        const user = { id: '3', username: 'wonder-woman', email: 'diana.prince@olympus.com' };
         const ret = await repository.update(user.id, user);
 
         expect(ret).toBe(true);
     });
 
-    it('Test find entity with DynamoDB', async () => {
-        const user = await repository.findOne('user:2');
+    it('Test find entity', async () => {
+        const user = await repository.findOne('2');
 
-        expect(user.id).toBe('user:2');
+        expect(user.id).toBe('2');
         expect(user.username).toBe('batman');
         expect(user.email).toBe('bruce@wayne.enterprises');
     });
 
-    it('Test delete entity with DynamoDB', async () => {
-        const ret = await repository.delete('user:4');
+    it('Test delete entity', async () => {
+        const ret = await repository.delete('4');
 
         expect(ret).toBe(true);
     });

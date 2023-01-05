@@ -9,18 +9,18 @@ export interface DatabaseAtomicAdapter {
      * @param id counter id
      * @returns current counter value
      */
-    checkCounter(id: string): Promise<number>;
+    checkCounter(key: Record<string, any>): Promise<number>;
 
     /**
      * 
      * @param id counter id
      * @param maxValue maximum counter value 
      */
-    incrementCounter(id: string, maxValue: number): Promise<boolean>;
+    incrementCounter(key: Record<string, any>, maxValue: number): Promise<boolean>;
 
     /**
      * 
      * @param id counter id
      */
-    decrementCounter(id: string): Promise<boolean>;
+    decrementCounter(key: Record<string, any>): Promise<boolean>;
 }

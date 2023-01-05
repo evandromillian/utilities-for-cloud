@@ -43,21 +43,21 @@ describe('Repository with Redis tests', () => {
         repository = new UserRepository(adapter);
     });
 
-    it('Test create entity with Redis', async () => {
+    it('Test create entity', async () => {
         const user = { id: 'user:1', username: 'superman', email: 'test@test.com' };
         const ret = await repository.create(user);
 
         expect(ret).toBe(true);
     });
 
-    it('Test update entity with Redis', async () => {
+    it('Test update entity', async () => {
         const user = { id: 'user:3', username: 'wonder-woman', email: 'diana.prince@olympus.com' };
         const ret = await repository.update(user.id, user);
 
         expect(ret).toBe(true);
     });
 
-    it('Test find entity with Redis', async () => {
+    it('Test find entity', async () => {
         const user = await repository.findOne('user:2');
 
         expect(user.id).toBe('user:2');
@@ -65,7 +65,7 @@ describe('Repository with Redis tests', () => {
         expect(user.email).toBe('bruce@wayne.enterprises');
     });
 
-    it('Test delete entity with Redis', async () => {
+    it('Test delete entity', async () => {
         const ret = await repository.delete('user:4');
 
         expect(ret).toBe(true);

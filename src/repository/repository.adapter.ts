@@ -1,12 +1,21 @@
 import { DatabaseAdapter } from "../adapters";
 import { toRecord } from "./parsers";
 
+export interface KeyStrategy {
+    parseKey: (id: string) => Record<string, any>,
+    joinKey: (item: Record<string, any>) => string
+}
+
 /**
  * Base repository class
  */
 export abstract class BaseRepository<T> {
+    keyStrategy: KeyStrategy;
 
-    constructor(private dbAdapter: DatabaseAdapter) { }
+    constructor(private dbAdapter: DatabaseAdapter, strategy?: KeyStrategy) {
+        // Define key strategy
+        this.keyStrategy = strategy || BaseRepository.defaultKeyStrategy();
+    }
 
     /**
      * Parse adapter result to the concrete entity
@@ -17,11 +26,19 @@ export abstract class BaseRepository<T> {
 
     /**
      * 
+     * 
      * @param item item to be added
      * @returns true if the item didn't exist in the repository earlier
      */
     async create(item: T): Promise<boolean> {
-        const record = toRecord(item);
+        let record = toRecord(item);
+        const key = this.keyStrategy.parseKey(record.id);
+        record = {
+            ...key, 
+            record
+        };
+        delete record.id;
+
         return await this.dbAdapter.create(record);
     }
 
@@ -32,8 +49,9 @@ export abstract class BaseRepository<T> {
      * @returns true if item was successfully updated
      */
     async update(id: string, item: T): Promise<boolean> {
+        const key = this.keyStrategy.parseKey(id);
         const record = toRecord(item);
-        return await this.dbAdapter.update(id, record);
+        return await this.dbAdapter.update(key, record);
     }
 
     /**
@@ -42,7 +60,8 @@ export abstract class BaseRepository<T> {
      * @returns true if the item was deleted
      */
     async delete(id: string): Promise<boolean> {
-        return await this.dbAdapter.delete(id);
+        const key = this.keyStrategy.parseKey(id);
+        return await this.dbAdapter.delete(key);
     }
 
     /**
@@ -60,7 +79,21 @@ export abstract class BaseRepository<T> {
      * @returns item
      */
     async findOne(id: string): Promise<T> {
-        const ret = await this.dbAdapter.findOne(id);        
+        const key = this.keyStrategy.parseKey(id);
+        const ret = await this.dbAdapter.findOne(key);
+        ret.id = this.keyStrategy.joinKey(ret);
         return this.toEntity(ret);
+    }
+
+    /**
+     * Providers a default key strategy that used id field as the primary key
+     * 
+     * @returns a default strategy to work with entity key
+     */
+    static defaultKeyStrategy(): KeyStrategy {
+        return {
+            parseKey: (id: string): Record<string, string> => { return { id: id }; },
+            joinKey: (item: Record<string, string>) => { return item.id; },
+        };
     }
 }

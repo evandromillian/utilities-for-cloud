@@ -40,6 +40,53 @@ module.exports = {
           }
         ],
       },
+      {
+        TableName: "table_sk",
+        KeySchema: [
+          { 
+              AttributeName: "pk", 
+              KeyType: "HASH" 
+          },
+          { 
+            AttributeName: "sk", 
+            KeyType: "RANGE" 
+          },
+        ],
+        AttributeDefinitions: [
+          {
+            AttributeName: "pk", 
+            AttributeType: "S" 
+          },
+          {
+            AttributeName: "sk", 
+            AttributeType: "S"
+          }
+        ],
+        ProvisionedThroughput: {
+          ReadCapacityUnits: 1,
+          WriteCapacityUnits: 1,
+        },
+        data: [
+          { 
+            pk: 'user', 
+            sk: '2',
+            username: 'batman', 
+            email: 'bruce@wayne.enterprises' 
+          },
+          { 
+            pk: 'user', 
+            sk: '3',
+            username: 'ww', 
+            email: 'diana@lesbos.island' 
+          },
+          { 
+            pk: 'user', 
+            sk: '4',
+            username: 'flash', 
+            email: 'barry.allen@ny.com' 
+          }
+        ],
+      },
     ],
     //basePort: 8002,
   };

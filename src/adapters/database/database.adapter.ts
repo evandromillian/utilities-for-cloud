@@ -16,21 +16,21 @@ export interface DatabaseAdapter {
    * @param item item to be updated
    * @returns true if item was successfully updated
    */
-  update(id: string, data: Record<string, any>): Promise<boolean>;
+  update(key: Record<string, any>, data: Record<string, any>): Promise<boolean>;
 
   /**
    *
    * @param id item id to be deleted
    * @returns true if the item was deleted
    */
-  delete(id: string): Promise<boolean>;
+  delete(key: Record<string, any>): Promise<boolean>;
 
   /**
    *
    * @param id item id to be found in repository
    * @returns item
    */
-  findOne(id: string): Promise<Record<string, any>>;
+  findOne(key: Record<string, any>): Promise<Record<string, any>>;
 
   /**
    *

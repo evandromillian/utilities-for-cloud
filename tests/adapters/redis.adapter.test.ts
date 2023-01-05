@@ -33,13 +33,13 @@ describe('Redis tests', () => {
 
     it('Test update entity with Redis', async () => {
         const user = { id: 'user:3', username: 'wonder-woman', email: 'diana.prince@olympus.com' };
-        const ret = await adapter.update(user.id, user);
+        const ret = await adapter.update({ id: user.id }, user);
 
         expect(ret).toBe(true);
     });
 
     it('Test find entity with Redis', async () => {
-        const user = await adapter.findOne('user:2');
+        const user = await adapter.findOne({ id: 'user:2' });
 
         expect(user.id).toBe('user:2');
         expect(user.username).toBe('batman');
@@ -47,7 +47,7 @@ describe('Redis tests', () => {
     });
 
     it('Test delete entity with Redis', async () => {
-        const ret = await adapter.delete('user:4');
+        const ret = await adapter.delete({ id: 'user:4' });
 
         expect(ret).toBe(true);
     });

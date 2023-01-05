@@ -7,34 +7,32 @@ import { DynamoDBDocumentClient,
          UpdateCommand,
          DeleteCommand,
          GetCommand, 
-         TransactWriteCommand} from "@aws-sdk/lib-dynamodb";
+         TransactWriteCommand,
+         TranslateConfig} from "@aws-sdk/lib-dynamodb";
 
 export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
-
     private static readonly COUNTER_VALUE = 'CounterValue';
 
     docClient: DynamoDBDocumentClient;
 
     constructor(private tableName: string, client?: DynamoDBClient) {
-        const marshallOptions = {
-            convertEmptyValues: false,
-            removeUndefinedValues: false,
-            convertClassInstanceToMap: false,
-        };
-        
-        const unmarshallOptions = {
-            wrapNumbers: false,
-        };
-
         if (!client) {
             client = new DynamoDBClient({});
         }
 
-        this.docClient = DynamoDBDocumentClient.from(client, { marshallOptions, unmarshallOptions });
+        const translateConfig: TranslateConfig = {
+            marshallOptions: {
+                convertEmptyValues: false,
+                removeUndefinedValues: false,
+                convertClassInstanceToMap: false,
+            }, unmarshallOptions: {
+                wrapNumbers: false,
+            }   
+        };
+        this.docClient = DynamoDBDocumentClient.from(client, translateConfig);
     }
     
-    async create(data: Record<string, any>): Promise<boolean> {
-        
+    async create(data: Record<string, any>): Promise<boolean> {        
         const cmd = new PutCommand({
             TableName: this.tableName,
             Item: data
@@ -44,35 +42,34 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
                                     .then(_ => true);
     }
 
-    async update(id: string, _data: Record<string, any>): Promise<boolean> {
+    async update(key: Record<string, any>, _data: Record<string, any>): Promise<boolean> {
         const cmd = new UpdateCommand({
             TableName: this.tableName,
-            Key: { id },
+            Key: key,
 
         });
 
         return await this.docClient.send(cmd).then(_ => true);
     }
 
-    async delete(id: string): Promise<boolean> {
+    async delete(key: Record<string, any>): Promise<boolean> {
         const cmd = new DeleteCommand({
             TableName: this.tableName,
-            Key: { id }
+            Key: key
         });
 
         return await this.docClient.send(cmd)
                                     .then(_ => true);
     }
 
-    async findOne(id: string): Promise<Record<string, any>> {
+    async findOne(key: Record<string, any>): Promise<Record<string, any>> {
         const cmd = new GetCommand({
             TableName: this.tableName,
-            Key: { id },
+            Key: key,
             ConsistentRead: true
         });
 
-        const ret = await this.docClient.send(cmd);
-
+        const ret = await this.docClient.send(cmd); 
         return ret.Item ? ret.Item : {};
     }
 
@@ -85,25 +82,26 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
      * - counter variable column: CounterValue
      * 
      */
-    async checkCounter(id: string): Promise<number> {
-        const it = await this.findOne(id);
+    async checkCounter(key: Record<string, any>): Promise<number> {
+        const it = await this.findOne(key);
         return it.CounterValue;
     }
 
     /**
+     * This implementation tries to update the counter row IF it exists, otherwise its created with value 1 (enabled)
      * Implements DatabaseAtomicAdapter::incrementCounter using some predefinitions:
      * - counter variable column: CounterValue
      * 
      */
-    async incrementCounter(id: string, maxValue: number): Promise<boolean> {
+    async incrementCounter(key: Record<string, any>, maxValue: number): Promise<boolean> {
         const cmd = new TransactWriteCommand({
             TransactItems: [
                 {
                     Put: {
                         TableName: this.tableName,
                         Item: {
-                            id,
-                            CounterValue: 0
+                            ...key,
+                            CounterValue: 1
                         },
                         ConditionExpression: 'attribute_not_exists(id)'
                     }
@@ -111,9 +109,7 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
                 {
                     Update: {
                         TableName: this.tableName,
-                        Key: {
-                            id,
-                        },
+                        Key: key,
                         UpdateExpression: 'SET #counter = if_not_exists(#counter, :init) + :one',
                         ConditionExpression: '#counter <= :maxvalue',
                         ExpressionAttributeNames: {
@@ -138,12 +134,10 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
      * - counter variable column: CounterValue
      * 
      */
-    async decrementCounter(id: string): Promise<boolean> {
+    async decrementCounter(key: Record<string, any>): Promise<boolean> {
         const cmd = new UpdateCommand({
             TableName: this.tableName,
-            Key: {
-              id,
-            },
+            Key: key,
             UpdateExpression: 'SET #counter = if_not_exists(#counter, :init) - :one',
             ConditionExpression: '#counter > :zero',
             ExpressionAttributeNames: {

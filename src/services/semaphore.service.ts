@@ -5,7 +5,7 @@ import { DatabaseAtomicAdapter } from "../adapters";
  */
 export class SemaphoreService {
 
-  constructor(private adapter: DatabaseAtomicAdapter, private keyName: string, private maxSemaphores = 1) {
+  constructor(private adapter: DatabaseAtomicAdapter, private key: Record<string, any>, private maxSemaphores = 1) {
     
   }
 
@@ -14,7 +14,7 @@ export class SemaphoreService {
    * @returns true is semaphore has been successfully acquired
    */
   async acquire(): Promise<boolean> {
-    return await this.adapter.incrementCounter(this.keyName, this.maxSemaphores);
+    return await this.adapter.incrementCounter(this.key, this.maxSemaphores);
   }
 
   /**
@@ -30,6 +30,6 @@ export class SemaphoreService {
    * @returns true is semaphore has been successfully released
    */
   async release(): Promise<boolean> {
-    return await this.adapter.decrementCounter(this.keyName);
+    return await this.adapter.decrementCounter(this.key);
   }
 }
