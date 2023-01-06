@@ -1,4 +1,4 @@
-import { DatabaseAdapter } from "../database.adapter";
+import { CompareType, DatabaseAdapter, QueryDesc } from "../database.adapter";
 import { DatabaseAtomicAdapter } from "../database_atomic.adapter";
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
@@ -8,7 +8,8 @@ import { DynamoDBDocumentClient,
          DeleteCommand,
          GetCommand, 
          TransactWriteCommand,
-         TranslateConfig} from "@aws-sdk/lib-dynamodb";
+         TranslateConfig,
+         QueryCommand} from "@aws-sdk/lib-dynamodb";
 
 export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
     private static readonly COUNTER_VALUE = 'CounterValue';
@@ -152,5 +153,77 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
         
         return await this.docClient.send(cmd)
                                    .then(_ => true);
+    }
+
+    async query(desc: QueryDesc): Promise<Record<string, any>[]> {
+        const cmd = this.parseQuery(desc);
+        const ret = await this.docClient.send(cmd);
+
+        return ret.Items || [];
+    }
+
+    private static readonly compareTypeToStr: Record<CompareType, string> = {
+        [CompareType.Equals]: '=',
+        [CompareType.GreaterThan]: '>=',
+        [CompareType.GreaterOrEqual]: '=',
+        [CompareType.LesserThan]: '<',
+        [CompareType.LesserOrEqual]: '<=',
+    }
+
+    private parseQuery(desc: QueryDesc): QueryCommand {
+        const cmd = new QueryCommand({
+            TableName: this.tableName,
+            ConsistentRead: false,      // to not throw error querying secondary indexes
+            KeyConditionExpression: '',
+            ExpressionAttributeValues: {},
+            //Limit: 10,
+            //ScanIndexForward: true,
+        });
+
+        let fieldCount = 1;
+
+        // Parse compare
+        for (const it of desc.compare || []) {
+            const itKey = Object.keys(it)[0];
+            const { type, value } = it[itKey];
+
+            const tName = DynamoDBAdapter.compareTypeToStr[type];
+            const vName = ':val' + fieldCount++;
+
+            cmd.input.KeyConditionExpression += ` ${itKey} ${tName} ${vName} `;
+            cmd.input.ExpressionAttributeValues![vName] = value;
+        }
+        
+        // Parse between
+        for (const it of desc.between || []) {
+            const itKey = Object.keys(it)[0];
+            const { left, right } = it[itKey];
+            
+            //const lType = typeof left;
+            //const rType = typeof right;
+            //if ((lType === 'number' || lType === 'boolean') && 
+            //    (rType === 'number' || rType === 'boolean')) {
+                    const lName = ':val' + fieldCount++;
+                    const rName = ':val' + fieldCount++;
+                    cmd.input.KeyConditionExpression += ` ${itKey} BETWEEN ${lName} AND ${rName} `;
+                
+                    cmd.input.ExpressionAttributeValues![lName] = left;
+                    cmd.input.ExpressionAttributeValues![rName] = right;
+            //}
+        }
+
+        //console.log('Key conditions: ' + cmd.input.KeyConditionExpression);
+        
+        
+        // FilterExpression are evaluated after the items were fetched, 
+        // so try to save data using good key conditions and indexes
+        
+        
+        // ExpressionAttributeNames
+        
+        
+        // ExpressionAttributeValues
+
+        return cmd;
     }
 }

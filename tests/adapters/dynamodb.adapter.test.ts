@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
-import { DynamoDBAdapter } from '../../src/adapters';
+import { DynamoDBAdapter, QueryDesc, CompareType } from '../../src/adapters';
 
 var adapter: DynamoDBAdapter;
 
@@ -44,5 +44,18 @@ describe('DynamoDB tests', () => {
         const ret = await adapter.delete({ id: 'user:4' });
 
         expect(ret).toBe(true);
+    });
+
+    it('Test query entities with equals comparison with DynamoDB', async () => {
+        const query: QueryDesc = {
+            compare: [
+                { 
+                    id: { type: CompareType.Equals, value: 'user:2' }
+                }
+            ]
+        };
+        const ret = await adapter.query(query);
+        
+        expect(ret.length).toBe(1);
     });
 });

@@ -1,4 +1,4 @@
-import { DatabaseAdapter } from '../database.adapter';
+import { DatabaseAdapter, QueryDesc } from '../database.adapter';
 
 import Redis from 'ioredis';
 
@@ -7,7 +7,7 @@ import Redis from 'ioredis';
  */
 export class RedisAdapter implements DatabaseAdapter {
   constructor(private redis: Redis, private parseKey: (item: Record<string, any>) => string = (i) => i.id) {}
-
+  
   async create(data: Record<string, any>): Promise<boolean> {
     const ret = await this.redis.hset(this.parseKey(data), data);
     return ret > 0;
@@ -33,6 +33,10 @@ export class RedisAdapter implements DatabaseAdapter {
   }
 
   async find(_data: Record<string, any>): Promise<Record<string, any>> {
+    throw new Error('Method not implemented.');
+  }
+
+  async query(_desc: QueryDesc): Promise<Record<string, any>[]> {
     throw new Error('Method not implemented.');
   }
 }

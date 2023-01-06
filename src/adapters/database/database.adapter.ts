@@ -1,3 +1,34 @@
+
+export declare type Arg = string | number | boolean | null | undefined;
+
+export enum CompareType {
+  Equals,
+  //NotEquals,
+  GreaterThan,
+  GreaterOrEqual,
+  LesserThan,
+  LesserOrEqual,
+}
+
+export interface QueryDesc {
+  readonly index?: string;
+  readonly exists?: string[];
+  readonly notExists?: string[];
+  readonly between?: { 
+    [field: string]: {
+      readonly left: Arg;
+      readonly right: Arg;
+    }
+  }[];
+  readonly compare?: {
+    [field: string]: {
+      readonly type: CompareType;
+      readonly field?: string;
+      readonly value?: Arg;
+    }
+  }[];
+}
+
 /**
  * Base interface to persist data to a database.
  * Currently is implemented per database and model.
@@ -38,4 +69,11 @@ export interface DatabaseAdapter {
    * @returns item
    */
   find(data: Record<string, any>): Promise<Record<string, any>>;
+
+  /**
+   * 
+   * @param query 
+   * @returns array of items
+   */
+  query(desc: QueryDesc): Promise<Record<string, any>[]>;
 }
