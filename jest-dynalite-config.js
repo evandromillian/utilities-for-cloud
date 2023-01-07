@@ -84,7 +84,13 @@ module.exports = {
             sk: '4',
             username: 'flash', 
             email: 'barry.allen@ny.com' 
-          }
+          },
+          { 
+            pk: 'user', 
+            sk: '69',
+            username: 'aquaman', 
+            email: 'arthur.curry@ocean.com' 
+          },
         ],
       },
     ],

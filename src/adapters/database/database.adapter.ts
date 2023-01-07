@@ -3,7 +3,7 @@ export declare type Arg = string | number | boolean | null | undefined;
 
 export enum CompareType {
   Equals,
-  //NotEquals,
+  NotEquals,
   GreaterThan,
   GreaterOrEqual,
   LesserThan,
@@ -12,21 +12,22 @@ export enum CompareType {
 
 export interface QueryDesc {
   readonly index?: string;
-  readonly exists?: string[];
-  readonly notExists?: string[];
+  readonly beginsWith?: { 
+    [field: string]: { readonly value: Arg; } 
+  };
   readonly between?: { 
     [field: string]: {
       readonly left: Arg;
       readonly right: Arg;
     }
-  }[];
+  };
   readonly compare?: {
     [field: string]: {
       readonly type: CompareType;
       readonly field?: string;
       readonly value?: Arg;
     }
-  }[];
+  };
 }
 
 /**

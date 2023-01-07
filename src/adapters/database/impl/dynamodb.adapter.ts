@@ -105,7 +105,7 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
                             CounterValue: 1
                         },
                         ConditionExpression: 'attribute_not_exists(id)'
-                    }
+                    },
                 },
                 {
                     Update: {
@@ -164,6 +164,7 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
 
     private static readonly compareTypeToStr: Record<CompareType, string> = {
         [CompareType.Equals]: '=',
+        [CompareType.NotEquals]: '!=',
         [CompareType.GreaterThan]: '>=',
         [CompareType.GreaterOrEqual]: '=',
         [CompareType.LesserThan]: '<',
@@ -175,54 +176,79 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
             TableName: this.tableName,
             ConsistentRead: false,      // to not throw error querying secondary indexes
             KeyConditionExpression: '',
+            //ExpressionAttributeNames: {},
             ExpressionAttributeValues: {},
             //Limit: 10,
             //ScanIndexForward: true,
         });
 
+        if (desc.index) {
+            cmd.input.IndexName = desc.index;
+        }
+
         let fieldCount = 1;
 
         // Parse compare
-        for (const it of desc.compare || []) {
-            const itKey = Object.keys(it)[0];
-            const { type, value } = it[itKey];
+        const compare = desc.compare || {};
+        for (const it of Object.keys(compare)) {
+            const { type, /*_field,*/ value } = compare[it];
 
             const tName = DynamoDBAdapter.compareTypeToStr[type];
             const vName = ':val' + fieldCount++;
 
-            cmd.input.KeyConditionExpression += ` ${itKey} ${tName} ${vName} `;
+            if (cmd.input.KeyConditionExpression!.length > 0) {
+                cmd.input.KeyConditionExpression! += ' AND ';
+            }
+            cmd.input.KeyConditionExpression += ` ${it} ${tName} ${vName} `;
+
             cmd.input.ExpressionAttributeValues![vName] = value;
         }
         
         // Parse between
-        for (const it of desc.between || []) {
-            const itKey = Object.keys(it)[0];
-            const { left, right } = it[itKey];
+        const between = desc.between || {};
+        for (const it of Object.keys(between)) {
+            const { left, right } = between[it];
             
             //const lType = typeof left;
             //const rType = typeof right;
             //if ((lType === 'number' || lType === 'boolean') && 
             //    (rType === 'number' || rType === 'boolean')) {
-                    const lName = ':val' + fieldCount++;
-                    const rName = ':val' + fieldCount++;
-                    cmd.input.KeyConditionExpression += ` ${itKey} BETWEEN ${lName} AND ${rName} `;
-                
-                    cmd.input.ExpressionAttributeValues![lName] = left;
-                    cmd.input.ExpressionAttributeValues![rName] = right;
+                const lName = ':val' + fieldCount++;
+                const rName = ':val' + fieldCount++;
+
+                if (cmd.input.KeyConditionExpression!.length > 0) {
+                    cmd.input.KeyConditionExpression! += ' AND ';
+                }
+                cmd.input.KeyConditionExpression += ` ${it} BETWEEN ${lName} AND ${rName} `;
+            
+                cmd.input.ExpressionAttributeValues![lName] = left;
+                cmd.input.ExpressionAttributeValues![rName] = right;
             //}
         }
 
-        //console.log('Key conditions: ' + cmd.input.KeyConditionExpression);
+        // Parse beginsWith
+        const beginsWith = desc.beginsWith || {};
+        for (const it of Object.keys(beginsWith)) {
+            const fieldAlias = '#name' + fieldCount++;
+            const valueAlias = ':val' + fieldCount++;
+
+            if (cmd.input.KeyConditionExpression!.length > 0) {
+                cmd.input.KeyConditionExpression! += ' AND ';
+            }
+            cmd.input.KeyConditionExpression += `begins_with(${fieldAlias}, ${valueAlias})`;
+
+            if (cmd.input.ExpressionAttributeNames === undefined) {
+                cmd.input.ExpressionAttributeNames = {};
+            }
+            cmd.input.ExpressionAttributeNames![fieldAlias] = it;
+            cmd.input.ExpressionAttributeValues![valueAlias] = beginsWith[it].value;
+        }
+
+        console.log('Key conditions: ' + cmd.input.KeyConditionExpression);
         
         
         // FilterExpression are evaluated after the items were fetched, 
         // so try to save data using good key conditions and indexes
-        
-        
-        // ExpressionAttributeNames
-        
-        
-        // ExpressionAttributeValues
 
         return cmd;
     }

@@ -19,12 +19,13 @@ class UserRepository extends BaseRepository<User> {
     }
 }
 
+var client: DynamoDBClient;
 var repository: UserRepository;
 
 describe('Repository with DynamoDB tests', () => {
 
     beforeAll(async () => {
-        const client = new DynamoDBClient({
+        client = new DynamoDBClient({
             ...(process.env.MOCK_DYNAMODB_ENDPOINT && {
               endpoint: process.env.MOCK_DYNAMODB_ENDPOINT,
               sslEnabled: false,
@@ -40,6 +41,10 @@ describe('Repository with DynamoDB tests', () => {
             joinKey: (item: Record<string, any>) => { return item.sk; },
         };        
         repository = new UserRepository(adapter, keyStrategy);
+    });
+
+    afterAll(() => {
+        client.destroy();
     });
 
     it('Test create entity', async () => {

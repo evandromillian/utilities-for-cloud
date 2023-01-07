@@ -2,12 +2,13 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 import { DynamoDBAdapter, QueryDesc, CompareType } from '../../src/adapters';
 
+var client: DynamoDBClient;
 var adapter: DynamoDBAdapter;
 
 describe('DynamoDB tests', () => {
 
     beforeAll(async () => {
-        const client = new DynamoDBClient({
+        client = new DynamoDBClient({
             ...(process.env.MOCK_DYNAMODB_ENDPOINT && {
               endpoint: process.env.MOCK_DYNAMODB_ENDPOINT,
               sslEnabled: false,
@@ -16,6 +17,10 @@ describe('DynamoDB tests', () => {
         });
 
         adapter = new DynamoDBAdapter('table', client);
+    });
+
+    afterAll(() => {
+        client.destroy();
     });
 
     it('Test create entity with DynamoDB', async () => {
@@ -48,14 +53,15 @@ describe('DynamoDB tests', () => {
 
     it('Test query entities with equals comparison with DynamoDB', async () => {
         const query: QueryDesc = {
-            compare: [
-                { 
-                    id: { type: CompareType.Equals, value: 'user:2' }
-                }
-            ]
+            compare: { 
+                id: { type: CompareType.Equals, value: 'user:2' }
+            }
         };
-        const ret = await adapter.query(query);
+        const user = await adapter.query(query);
         
-        expect(ret.length).toBe(1);
+        expect(user.length).toBe(1);
+        expect(user[0].id).toBe('user:2');
+        expect(user[0].username).toBe('batman');
+        expect(user[0].email).toBe('bruce@wayne.enterprises');
     });
 });
