@@ -229,6 +229,8 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
         // Parse beginsWith
         const beginsWith = desc.beginsWith || {};
         for (const it of Object.keys(beginsWith)) {
+            const value = beginsWith[it].value;
+
             const fieldAlias = '#name' + fieldCount++;
             const valueAlias = ':val' + fieldCount++;
 
@@ -241,10 +243,10 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
                 cmd.input.ExpressionAttributeNames = {};
             }
             cmd.input.ExpressionAttributeNames![fieldAlias] = it;
-            cmd.input.ExpressionAttributeValues![valueAlias] = beginsWith[it].value;
+            cmd.input.ExpressionAttributeValues![valueAlias] = value;
         }
 
-        console.log('Key conditions: ' + cmd.input.KeyConditionExpression);
+        //console.log('Key conditions: ' + cmd.input.KeyConditionExpression);
         
         
         // FilterExpression are evaluated after the items were fetched, 

@@ -1,6 +1,6 @@
 const Redis = require('ioredis-mock')
 
-import { RedisAdapter } from '../../src/adapters';
+import { RedisAdapter, QueryDesc } from '../../src/adapters';
 
 var adapter: RedisAdapter;
 
@@ -14,14 +14,13 @@ describe('Redis tests', () => {
                   'clark@daily.planet': '1',
                   'bruce@wayne.enterprises': '2',
                 },
-                //'user:1': { id: 'user:1', username: 'superman', email: 'clark@daily.planet' },
-                'user:2': { id: 'user:2', username: 'batman', email: 'bruce@wayne.enterprises' },
-                'user:3': { id: 'user:3', username: 'ww', email: 'diana@lesbos.island' },
-                'user:4': { id: 'user:4', username: 'flash', email: 'barry.allen@ny.com' },
               },
         });
 
         adapter = new RedisAdapter(redis);
+        await adapter.create({ id: 'user:2', username: 'batman', email: 'bruce@wayne.enterprises' });
+        await adapter.create({ id: 'user:3', username: 'ww', email: 'diana@lesbos.island' });
+        await adapter.create({ id: 'user:4', username: 'flash', email: 'barry.allen@ny.com' });
     });
 
     it('Test create entity with Redis', async () => {
@@ -50,5 +49,19 @@ describe('Redis tests', () => {
         const ret = await adapter.delete({ id: 'user:4' });
 
         expect(ret).toBe(true);
+    });
+
+    it('Test query entities with begins with comparison with Redis', async () => {
+        const query: QueryDesc = {
+            beginsWith: {
+                id: { value: 'user:2' }
+            }
+        };
+        const user = await adapter.query(query);
+        
+        expect(user.length).toBe(1);
+        expect(user[0].id).toBe('user:2');
+        expect(user[0].username).toBe('batman');
+        expect(user[0].email).toBe('bruce@wayne.enterprises');
     });
 });
