@@ -52,18 +52,6 @@ describe('DynamoDB sort key tests', () => {
         expect(ret).toBe(true);
     });
 
-    it('Test query entities with equals comparison with DynamoDB', async () => {
-        const query: QueryDesc = {
-            compare: { 
-                pk: { type: CompareType.Equals, value: 'user' },
-                sk: { type: CompareType.GreaterThan, value: '2' }
-            }
-        };
-        const user = await adapter.query(query);
-        
-        expect(user.length).toBeGreaterThan(0);
-    });
-
     it('Test query entities with begins_with comparison with DynamoDB', async () => {
         const query: QueryDesc = {
             compare: { 
@@ -80,5 +68,91 @@ describe('DynamoDB sort key tests', () => {
         expect(user[0].sk).toBe('69');
         expect(user[0].username).toBe('aquaman');
         expect(user[0].email).toBe('arthur.curry@ocean.com');
+    });
+
+    it('Test query entities with equals comparison with DynamoDB', async () => {
+        const query: QueryDesc = {
+            compare: { 
+                pk: { type: CompareType.Equals, value: 'user' },
+                sk: { type: CompareType.GreaterThan, value: '2' }
+            }
+        };
+        const user = await adapter.query(query);
+        
+        expect(user.length).toBeGreaterThan(0);
+    });
+
+    it('Test query entities using greater than with DynamoDB', async () => {
+        const query: QueryDesc = {
+            compare: {
+                pk: { type: CompareType.Equals, value: 'user' },
+                sk: { type: CompareType.GreaterThan, value: '2' }
+            }
+        };
+        const user = await adapter.query(query);
+        
+        expect(user.length).toBe(2);
+        expect(user[0].sk).toBe('3');
+        expect(user[1].sk).toBe('69');
+    });
+
+    it('Test query entities using lesser than with DynamoDB', async () => {
+        const query: QueryDesc = {
+            compare: {
+                pk: { type: CompareType.Equals, value: 'user' },
+                sk: { type: CompareType.LesserThan, value: '3' }
+            }
+        };
+        const user = await adapter.query(query);
+        
+        expect(user.length).toBe(2);
+        expect(user[0].sk).toBe('1');
+        expect(user[1].sk).toBe('2');
+    });
+
+    it('Test query entities using greater or equals than with DynamoDB', async () => {
+        const query: QueryDesc = {
+            compare: {
+                pk: { type: CompareType.Equals, value: 'user' },
+                sk: { type: CompareType.GreaterOrEqual, value: '3' }
+            }
+        };
+        const user = await adapter.query(query);
+        
+        expect(user.length).toBe(2);
+        expect(user[0].sk).toBe('3');
+        expect(user[1].sk).toBe('69');
+    });
+
+    it('Test query entities using lesser or equals than with DynamoDB', async () => {
+        const query: QueryDesc = {
+            compare: {
+                pk: { type: CompareType.Equals, value: 'user' },
+                sk: { type: CompareType.LesserOrEqual, value: '3' }
+            }
+        };
+        const user = await adapter.query(query);
+        
+        expect(user.length).toBe(3);
+        expect(user[0].sk).toBe('1');
+        expect(user[1].sk).toBe('2');
+        expect(user[2].sk).toBe('3');
+    });
+
+    it('Test query entities between with DynamoDB', async () => {
+        const query: QueryDesc = {
+            compare: {
+                pk: { type: CompareType.Equals, value: 'user' },
+            },
+            between: {
+                sk: { left: '2', right: '69' }
+            }
+        };
+        const user = await adapter.query(query);
+        
+        expect(user.length).toBe(3);
+        expect(user[0].sk).toBe('2');
+        expect(user[1].sk).toBe('3');
+        expect(user[2].sk).toBe('69');
     });
 });

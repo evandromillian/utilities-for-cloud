@@ -1,13 +1,10 @@
-import { DatabaseAtomicAdapter } from "../adapters";
+import { DatabaseAtomicAdapter } from '../adapters';
 
 /**
  *
  */
 export class SemaphoreService {
-
-  constructor(private adapter: DatabaseAtomicAdapter, private key: Record<string, any>, private maxSemaphores = 1) {
-    
-  }
+  constructor(private adapter: DatabaseAtomicAdapter, private key: Record<string, any>, private maxSemaphores = 1) {}
 
   /**
    * Acquire the semaphore
@@ -18,11 +15,11 @@ export class SemaphoreService {
   }
 
   /**
-   * 
-   * @param timeout 
+   *
+   * @param timeout
    */
   async acquireWithTimeout(_timeout: number): Promise<boolean> {
-    throw new Error("Not implemented");
+    throw new Error('Not implemented');
   }
 
   /**

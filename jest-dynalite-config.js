@@ -37,7 +37,12 @@ module.exports = {
             id: 'user:4', 
             username: 'flash', 
             email: 'barry.allen@ny.com' 
-          }
+          },
+          { 
+            id: 'user:69',
+            username: 'aquaman', 
+            email: 'arthur.curry@ocean.com' 
+          },
         ],
       },
       {

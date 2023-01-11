@@ -1,4 +1,3 @@
-
 export declare type Arg = string | number | boolean | null | undefined;
 
 export enum CompareType {
@@ -12,21 +11,21 @@ export enum CompareType {
 
 export interface QueryDesc {
   readonly index?: string;
-  readonly beginsWith?: { 
-    [field: string]: { readonly value: Arg; } 
+  readonly beginsWith?: {
+    [field: string]: { readonly value: Arg };
   };
-  readonly between?: { 
+  readonly between?: {
     [field: string]: {
       readonly left: Arg;
       readonly right: Arg;
-    }
+    };
   };
   readonly compare?: {
     [field: string]: {
       readonly type: CompareType;
       readonly field?: string;
       readonly value?: Arg;
-    }
+    };
   };
 }
 
@@ -72,8 +71,8 @@ export interface DatabaseAdapter {
   find(data: Record<string, any>): Promise<Record<string, any>>;
 
   /**
-   * 
-   * @param query 
+   *
+   * @param query
    * @returns array of items
    */
   query(desc: QueryDesc): Promise<Record<string, any>[]>;

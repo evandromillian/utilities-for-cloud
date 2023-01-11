@@ -32,14 +32,16 @@ describe('Repository with Redis tests', () => {
                   'clark@daily.planet': '1',
                   'bruce@wayne.enterprises': '2',
                 },
-                //'user:1': { id: 'user:1', username: 'superman', email: 'clark@daily.planet' },
-                'user:2': { id: 'user:2', username: 'batman', email: 'bruce@wayne.enterprises' },
-                'user:3': { id: 'user:3', username: 'ww', email: 'diana@lesbos.island' },
-                'user:4': { id: 'user:4', username: 'flash', email: 'barry.allen@ny.com' },
               },
         });
 
+        // Creating test items using the adapter, to correctly fill the indexes
         const adapter = new RedisAdapter(redis);
+        await adapter.create({ id: 'user:2', username: 'batman', email: 'bruce@wayne.enterprises' });
+        await adapter.create({ id: 'user:3', username: 'ww', email: 'diana@lesbos.island' });
+        await adapter.create({ id: 'user:4', username: 'flash', email: 'barry.allen@ny.com' });
+        await adapter.create({ id: 'user:69', username: 'aquaman', email: 'arthur.curry@ocean.com' });
+
         repository = new UserRepository(adapter);
     });
 
