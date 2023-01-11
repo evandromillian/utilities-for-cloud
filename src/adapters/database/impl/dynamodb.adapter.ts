@@ -177,10 +177,7 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
       TableName: this.tableName,
       ConsistentRead: false, // to not throw error querying secondary indexes
       KeyConditionExpression: '',
-      //ExpressionAttributeNames: {},
       ExpressionAttributeValues: {},
-      //Limit: 10,
-      //ScanIndexForward: true,
     });
 
     if (desc.index) {
@@ -192,7 +189,7 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
     // Parse compare
     const compare = desc.compare || {};
     for (const it of Object.keys(compare)) {
-      const { type, /*_field,*/ value } = compare[it];
+      const { type, value } = compare[it];
 
       const tName = DynamoDBAdapter.compareTypeToStr[type];
       const vName = ':val' + fieldCount++;
@@ -210,10 +207,6 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
     for (const it of Object.keys(between)) {
       const { left, right } = between[it];
 
-      //const lType = typeof left;
-      //const rType = typeof right;
-      //if ((lType === 'number' || lType === 'boolean') &&
-      //    (rType === 'number' || rType === 'boolean')) {
       const lName = ':val' + fieldCount++;
       const rName = ':val' + fieldCount++;
 
@@ -224,7 +217,6 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
 
       cmd.input.ExpressionAttributeValues![lName] = left;
       cmd.input.ExpressionAttributeValues![rName] = right;
-      //}
     }
 
     // Parse beginsWith
