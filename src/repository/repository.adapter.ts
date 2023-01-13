@@ -1,10 +1,6 @@
 import { DatabaseAdapter } from '../adapters';
 import { toRecord } from './parsers';
-
-export interface KeyStrategy {
-  parseKey: (id: string) => Record<string, any>;
-  joinKey: (item: Record<string, any>) => string;
-}
+import { defaultKeyStrategy, KeyStrategy } from './strategy';
 
 /**
  * Base repository class
@@ -14,7 +10,7 @@ export abstract class BaseRepository<T> {
 
   constructor(private dbAdapter: DatabaseAdapter, strategy?: KeyStrategy) {
     // Define key strategy
-    this.keyStrategy = strategy || BaseRepository.defaultKeyStrategy();
+    this.keyStrategy = strategy || defaultKeyStrategy();
   }
 
   /**
@@ -85,19 +81,7 @@ export abstract class BaseRepository<T> {
     return this.toEntity(ret);
   }
 
-  /**
-   * Providers a default key strategy that used id field as the primary key
-   *
-   * @returns a default strategy to work with entity key
-   */
-  static defaultKeyStrategy(): KeyStrategy {
-    return {
-      parseKey: (id: string): Record<string, string> => {
-        return { id };
-      },
-      joinKey: (item: Record<string, string>) => {
-        return item.id;
-      },
-    };
+  async query(): Promise<T[]> {
+    throw new Error('Method not implemented.');
   }
 }

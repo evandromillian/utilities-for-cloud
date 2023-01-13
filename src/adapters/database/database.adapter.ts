@@ -9,6 +9,9 @@ export enum CompareType {
   LesserOrEqual,
 }
 
+/**
+ * Information about fields and conditions required for the query.
+ */
 export interface QueryDesc {
   readonly index?: string;
   readonly beginsWith?: {
@@ -31,7 +34,7 @@ export interface QueryDesc {
 
 /**
  * Base interface to persist data to a database.
- * Currently is implemented per database and model.
+ * Currently is implemented per database and model. 
  */
 export interface DatabaseAdapter {
   /**
