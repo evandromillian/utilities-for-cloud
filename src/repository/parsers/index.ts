@@ -26,7 +26,7 @@ export function toRecord(object: any): Record<string, any> {
   const record: Record<string, any> = {};
   Object.entries(object).reduce((obj, val) => {
     const [key, value] = val;
-    obj[key] = typeof value === 'number' ? value.toString() : (value as string);
+    obj[key] = (typeof value === 'number' ? value.toString() : (value as string));
     return obj;
   }, record);
 

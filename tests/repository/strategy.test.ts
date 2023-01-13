@@ -3,7 +3,7 @@ import { defaultKeyStrategy, prefixedKeyStrategy, splittedKeyStrategy } from "..
 
 describe('Key Strategy tests', () => {
 
-    it('Test parse key with default key strategy', async () => {
+    it('Test parse key with default key strategy', () => {
         const id = 'test';
 
         const strategy = defaultKeyStrategy();
@@ -12,7 +12,7 @@ describe('Key Strategy tests', () => {
         expect(key).toStrictEqual({ id });
     });
 
-    it('Test join key with default key strategy', async () => {
+    it('Test join key with default key strategy', () => {
         const id = 'test';
 
         const strategy = defaultKeyStrategy();
@@ -21,7 +21,7 @@ describe('Key Strategy tests', () => {
         expect(key).toBe(id);
     });
 
-    it('Test parse key with splitted key strategy', async () => {
+    it('Test parse key with splitted key strategy', () => {
         const separator = ':';
         const id = 'test:test';
 
@@ -31,7 +31,7 @@ describe('Key Strategy tests', () => {
         expect(key).toStrictEqual({ pk: 'test', sk: 'test' });
     });
 
-    it('Test join key with splitted key strategy', async () => {
+    it('Test join key with splitted key strategy', () => {
         const separator = ':';
         const id = 'test';
 
@@ -41,7 +41,7 @@ describe('Key Strategy tests', () => {
         expect(key).toBe(id + separator + id);
     });
 
-    it('Test parse key with prefixed key strategy', async () => {
+    it('Test parse key with prefixed key strategy', () => {
         const prefix = 'test';
         const id = '123';
 
@@ -51,7 +51,7 @@ describe('Key Strategy tests', () => {
         expect(key).toStrictEqual({ pk: prefix, sk: id });
     });
 
-    it('Test join key with prefixed key strategy', async () => {
+    it('Test join key with prefixed key strategy', () => {
         const prefix = 'test';
         const id = '123';
 
