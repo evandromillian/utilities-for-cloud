@@ -61,7 +61,7 @@ describe('Redis tests', () => {
     it('Test query entities using begins with Redis', async () => {
         const query: QueryDesc = {
             beginsWith: {
-                id: { value: 'user:2' }
+                id: 'user:2'
             }
         };
         const user = await adapter.query(query);

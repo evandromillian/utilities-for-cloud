@@ -9,27 +9,33 @@ export enum CompareType {
   LesserOrEqual,
 }
 
+export interface BeginsWithDesc {
+  [field: string]: Arg;
+}
+
+export interface BetweenDesc {
+  [field: string]: {
+    readonly left: Arg;
+    readonly right: Arg;
+  }
+};
+
+export interface CompareDesc {
+  [field: string]: {
+    readonly type: CompareType;
+    readonly field?: string;
+    readonly value?: Arg;
+  };
+}
+
 /**
  * Information about fields and conditions required for the query.
  */
 export interface QueryDesc {
   readonly index?: string;
-  readonly beginsWith?: {
-    [field: string]: { readonly value: Arg };
-  };
-  readonly between?: {
-    [field: string]: {
-      readonly left: Arg;
-      readonly right: Arg;
-    };
-  };
-  readonly compare?: {
-    [field: string]: {
-      readonly type: CompareType;
-      readonly field?: string;
-      readonly value?: Arg;
-    };
-  };
+  readonly beginsWith?: BeginsWithDesc;
+  readonly between?: BetweenDesc;
+  readonly compare?: CompareDesc;
 }
 
 /**

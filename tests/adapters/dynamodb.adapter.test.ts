@@ -54,7 +54,7 @@ describe('DynamoDB tests', () => {
     it.skip('Test query entities using begins with DynamoDB', async () => {
         const query: QueryDesc = {
             beginsWith: {
-                id: { value: 'user:2' }
+                id: 'user:2'
             }
         };
         const user = await adapter.query(query);

@@ -180,7 +180,7 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
       ExpressionAttributeValues: {},
     });
 
-    if (desc.index) {
+    if (desc.index && desc.index.length > 0) {
       cmd.input.IndexName = desc.index;
     }
 
@@ -222,7 +222,7 @@ export class DynamoDBAdapter implements DatabaseAdapter, DatabaseAtomicAdapter {
     // Parse beginsWith
     const beginsWith = desc.beginsWith || {};
     for (const it of Object.keys(beginsWith)) {
-      const value = beginsWith[it].value;
+      const value = beginsWith[it];
 
       const fieldAlias = '#name' + fieldCount++;
       const valueAlias = ':val' + fieldCount++;

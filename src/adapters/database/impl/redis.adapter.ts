@@ -90,7 +90,7 @@ export class RedisAdapter implements DatabaseAdapter {
     // Parse begins with
     const beginsWith = desc.beginsWith || {};
     for (const it of Object.keys(beginsWith)) {
-      const value = beginsWith[it].value as string;
+      const value = beginsWith[it] as string;
 
       const keys = await this.indexes.fetchKeysBeginsWith(value);
       keys.forEach((key) => keysSet.add(key));

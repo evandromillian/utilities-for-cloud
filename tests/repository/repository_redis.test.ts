@@ -1,6 +1,6 @@
 const Redis = require('ioredis-mock')
 
-import { RedisAdapter } from '../../src/adapters';
+import { CompareType, QueryDesc, RedisAdapter } from '../../src/adapters';
 
 import { BaseRepository } from '../../src/repository';
 
@@ -20,6 +20,7 @@ class UserRepository extends BaseRepository<User> {
     }
 }
 
+var zrangeMockSpy: jest.SpyInstance<any>;
 var repository: UserRepository;
 
 describe('Repository with Redis tests', () => {
@@ -34,6 +35,9 @@ describe('Repository with Redis tests', () => {
                 },
               },
         });
+
+        // Mock Redis.zrange because ioredis-mock doesn't support BYLEX operations
+        zrangeMockSpy = jest.spyOn(redis, 'zrange');
 
         // Creating test items using the adapter, to correctly fill the indexes
         const adapter = new RedisAdapter(redis);
@@ -71,5 +75,25 @@ describe('Repository with Redis tests', () => {
         const ret = await repository.delete('user:4');
 
         expect(ret).toBe(true);
+    });
+
+    it('Test query entities', async () => {
+        zrangeMockSpy.mockReturnValue(['user:69']);
+
+        const query: QueryDesc = {
+            compare: {
+                id: { type: CompareType.GreaterThan, value: 'user:3' }
+            }
+        };
+
+        const ret = await repository.query(query);
+
+        expect(ret).not.toBeUndefined();
+        expect(ret.length).toBe(1);
+        expect(ret[0]).toStrictEqual({
+            id: 'user:69',
+            username: 'aquaman', 
+            email: 'arthur.curry@ocean.com'
+        })
     });
 });

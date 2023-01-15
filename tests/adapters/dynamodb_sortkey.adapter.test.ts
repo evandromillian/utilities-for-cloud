@@ -58,7 +58,7 @@ describe('DynamoDB sort key tests', () => {
                 pk: { type: CompareType.Equals, value: 'user' }
             },
             beginsWith: { 
-                sk: { value: '6' }
+                sk: '6'
             }
         };
         const user = await adapter.query(query);

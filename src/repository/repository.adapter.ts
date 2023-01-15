@@ -1,16 +1,17 @@
-import { DatabaseAdapter } from '../adapters';
+import { DatabaseAdapter, QueryDesc } from '../adapters';
 import { toRecord } from './parsers';
-import { defaultKeyStrategy, KeyStrategy } from './strategy';
+import { DefaultKeyStrategy, KeyStrategy } from '.';
 
 /**
- * Base repository class
+ * This is the Base repository class, 
+ * that is responsible to parse data to and from the database adapter.
  */
 export abstract class BaseRepository<T> {
   keyStrategy: KeyStrategy;
 
   constructor(private dbAdapter: DatabaseAdapter, strategy?: KeyStrategy) {
     // Define key strategy
-    this.keyStrategy = strategy || defaultKeyStrategy();
+    this.keyStrategy = strategy || new DefaultKeyStrategy();
   }
 
   /**
@@ -39,7 +40,8 @@ export abstract class BaseRepository<T> {
   }
 
   /**
-   *
+   * 
+   * 
    * @param id item id
    * @param item item to be updated
    * @returns true if item was successfully updated
@@ -51,7 +53,8 @@ export abstract class BaseRepository<T> {
   }
 
   /**
-   *
+   * 
+   * 
    * @param id item id to be deleted
    * @returns true if the item was deleted
    */
@@ -61,7 +64,8 @@ export abstract class BaseRepository<T> {
   }
 
   /**
-   *
+   * 
+   * 
    * @param item data to search item from repository
    * @returns item
    */
@@ -70,7 +74,8 @@ export abstract class BaseRepository<T> {
   }
 
   /**
-   *
+   * 
+   * 
    * @param id item id to be found in repository
    * @returns item
    */
@@ -81,7 +86,18 @@ export abstract class BaseRepository<T> {
     return this.toEntity(ret);
   }
 
-  async query(): Promise<T[]> {
-    throw new Error('Method not implemented.');
+  /**
+   * 
+   * 
+   * @param query query description
+   * @returns array of items
+   */
+  async query(query: QueryDesc): Promise<T[]> {
+    const pquery = this.keyStrategy.parseQuery(query);
+    const ret = await this.dbAdapter.query(pquery);
+    return ret.map(e => {
+      e.id = this.keyStrategy.joinKey(e);
+      return this.toEntity(e);
+    });
   }
 }

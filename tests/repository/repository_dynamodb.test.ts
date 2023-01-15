@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBAdapter } from "../../src/adapters";
+import { CompareType, DynamoDBAdapter, QueryDesc } from "../../src/adapters";
 
-import { BaseRepository } from '../../src/repository';
+import { BaseRepository, PrefixedKeyStrategy } from '../../src/repository';
 
 interface User {
     id: string;
@@ -33,14 +33,7 @@ describe('Repository with DynamoDB tests', () => {
             }),
         });
         const adapter = new DynamoDBAdapter('table_sk', client);
-
-        const keyStrategy = {
-            parseKey: (id: string): Record<string, any> => {
-                return { pk: 'user', sk: id }; 
-            },
-            joinKey: (item: Record<string, any>) => { return item.sk; },
-        };        
-        repository = new UserRepository(adapter, keyStrategy);
+        repository = new UserRepository(adapter, new PrefixedKeyStrategy('user'));
     });
 
     afterAll(() => {
@@ -73,5 +66,23 @@ describe('Repository with DynamoDB tests', () => {
         const ret = await repository.delete('4');
 
         expect(ret).toBe(true);
+    });
+
+    it('Test query entities', async () => {
+        const query: QueryDesc = {
+            compare: {
+                id: { type: CompareType.GreaterThan, value: '3' }
+            }
+        };
+
+        const ret = await repository.query(query);
+
+        expect(ret).not.toBeUndefined();
+        expect(ret.length).toBe(1);
+        expect(ret[0]).toStrictEqual({
+            id: '69',
+            username: 'aquaman', 
+            email: 'arthur.curry@ocean.com'
+        })
     });
 });
