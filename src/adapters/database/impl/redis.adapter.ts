@@ -103,6 +103,7 @@ export class RedisAdapter implements DatabaseAdapter {
   /**
    * Fetch multiple hashes with its values in one single transaction,
    * using code from [this tutorial](https://icodealot.com/get-multiple-redis-hashes-in-node-js/)
+   * 
    * @param keys keys to fetch items
    * @returns hash items
    */
