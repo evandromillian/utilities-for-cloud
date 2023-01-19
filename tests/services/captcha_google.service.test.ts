@@ -1,15 +1,20 @@
 import axios from 'axios';
+
+import { CaptchaService } from '../../src/services';
+import { GoogleCaptchaAdapter } from '../../src/adapters';
+
+
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-import { GoogleCaptchaService } from "../../src/services";
 
-var captchaService: GoogleCaptchaService;
+var captchaService: CaptchaService;
 
 describe('Captcha tests', () => {
 
     beforeAll(async () => {
-        captchaService = new GoogleCaptchaService('234');
+        const captchaAdapter = new GoogleCaptchaAdapter('234');
+        captchaService = new CaptchaService(captchaAdapter);
     });
 
     beforeEach(() => {

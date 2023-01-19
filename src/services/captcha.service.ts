@@ -1,11 +1,18 @@
+import { CaptchaAdapter } from "../adapters";
+
 /**
  *
  */
-export interface ICaptchaService {
+export class CaptchaService {
+
+  constructor(private adapter: CaptchaAdapter) {}
+
   /**
    *
    * @param captcha
    * @returns true
    */
-  check(captcha: string): Promise<boolean>;
+  async check(captcha: string): Promise<boolean> {
+    return await this.adapter.check(captcha);
+  }
 }
