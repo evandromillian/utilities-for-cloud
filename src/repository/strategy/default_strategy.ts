@@ -6,8 +6,6 @@ import { BeginsWithDesc, BetweenDesc, CompareDesc, CompareType } from "../../ada
  * 
  */
 export class DefaultKeyStrategy implements KeyStrategy {
-    constructor() {}
-
     parseKey(id: string): Record<string, string> {
       return { id };
     }
@@ -27,18 +25,17 @@ export class DefaultKeyStrategy implements KeyStrategy {
      * @param outBeginsWith 
      */
     protected parseBeginsWith(query: QueryDesc, outCompare: CompareDesc, outBeginsWith: BeginsWithDesc) {
-      const queryBeginsWith = query.beginsWith || {};
-      const id_begins = queryBeginsWith['id'];
-      if (id_begins !== undefined) {
-        const { pk, sk } = this.parseKey(id_begins as string);
+      const { id } = query.beginsWith || {};
+      if (id !== undefined) {
+        const { pk, sk } = this.parseKey(id as string);
     
         // PK should use only Equals comparison
-        outCompare['pk'] = {
+        outCompare.pk = {
             type: CompareType.Equals,
             value: pk
         };
     
-        outBeginsWith['sk'] = sk;
+        outBeginsWith.sk = sk;
       }
     }
 
@@ -59,12 +56,12 @@ export class DefaultKeyStrategy implements KeyStrategy {
         // TODO asset leftArg.pk === rightArg.pk
         
         // PK should use only Equals comparison
-        outCompare['pk'] = {
+        outCompare.pk = {
             type: CompareType.Equals,
             value: leftArg.pk
         };
 
-        outBetween['sk'] = { left: leftArg.sk, right: rightArg.sk };
+        outBetween.sk = { left: leftArg.sk, right: rightArg.sk };
       }
     }
 
@@ -76,13 +73,13 @@ export class DefaultKeyStrategy implements KeyStrategy {
         const { pk, sk } = this.parseKey(value as string);
 
         // PK should use only Equals comparison
-        outCompare['pk'] = {
+        outCompare.pk = {
           type: CompareType.Equals,
           value: pk
         };
 
-        outCompare['sk'] = {
-          type: type,
+        outCompare.sk = {
+          type,
           value: sk
         };
       }
