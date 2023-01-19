@@ -6,12 +6,23 @@ import { Arg, CompareType } from '../database.adapter';
  * TODO add extensions to create custom indexes for different patterns
  */
 export class RedisIndex {
+    // Constants for index suffixes
+    private static readonly COMPARE = 'Compare';
+    private static readonly BEGINSWITH = 'BeginsWith';
+
+    // Constants for Redis comparison operators 
     private static readonly MIN_INF = '-';
     private static readonly MAX_INF = '+';
     private static readonly INCLUSIVE = '[';
     private static readonly EXCLUSIVE = '(';
+
+    private readonly compareIdx;
+    private readonly beginsWithIdx;
   
-    constructor(private redis: Redis, private indexName: string) {}
+    constructor(private redis: Redis, private indexName: string) {
+      this.compareIdx = this.indexName + RedisIndex.COMPARE;
+      this.beginsWithIdx = this.indexName + RedisIndex.BEGINSWITH;
+    }
   
     public get name(): string {
       return this.indexName;
@@ -23,8 +34,8 @@ export class RedisIndex {
      * @returns
      */
     async addKey(key: string): Promise<boolean> {
-      let ret = await this.redis.zadd(this.indexName + 'Compare', 0, key);
-      ret += await this.redis.sadd(this.indexName + 'BeginsWith', key);
+      let ret = await this.redis.zadd(this.compareIdx, 0, key);
+      ret += await this.redis.sadd(this.beginsWithIdx, key);
   
       return ret > 0;
     }
@@ -35,8 +46,8 @@ export class RedisIndex {
      * @returns
      */
     async removeKey(key: string): Promise<boolean> {
-      let ret = await this.redis.zrem(this.indexName + 'Compare', key);
-      ret += await this.redis.srem(this.indexName + 'BeginsWith', key);
+      let ret = await this.redis.zrem(this.compareIdx, key);
+      ret += await this.redis.srem(this.beginsWithIdx, key);
   
       return ret > 0;
     }
@@ -50,7 +61,7 @@ export class RedisIndex {
     async fetchKeysBetween(min: Arg, max: Arg): Promise<string[]> {
       min = RedisIndex.INCLUSIVE + min!.toString();
       max = RedisIndex.INCLUSIVE + max!.toString();
-      return await this.redis.zrange(this.indexName + 'Compare', min, max, 'BYLEX');
+      return await this.redis.zrange(this.compareIdx, min, max, 'BYLEX');
     }
   
     /**
@@ -97,7 +108,7 @@ export class RedisIndex {
           break;
       }
   
-      return await this.redis.zrange(this.indexName + 'Compare', min, max, 'BYLEX');
+      return await this.redis.zrange(this.compareIdx, min, max, 'BYLEX');
     }
   
     /**
@@ -107,7 +118,7 @@ export class RedisIndex {
      * @returns matched keys
      */
     async fetchKeysBeginsWith(prefix: string): Promise<string[]> {
-      const stream = this.redis.sscanStream(this.indexName + 'BeginsWith', {
+      const stream = this.redis.sscanStream(this.beginsWithIdx, {
         match: prefix + '*',
       });
   
